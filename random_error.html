@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math demo - Random error</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="container">
+
+    <main class="py-4 row">
+        <h1>Random error</h1>
+        <p class="mt-3">
+            <span class="fst-italic">Welcome! In this demonstration, we will show visualize the concept of random error in statistics.</span>
+            <a href="index.html">Back to Home</a>
+        </p>
+        <div class="row">
+            <div class="col-md-4">
+                <span>Population size: <span text-object="noPopItems" class="fw-bold"></span></span>
+                <input type="range" id="inp-no-pop-items" class="form-range" min="100" max="500" text-object="noPopItems">
+            </div>
+            <div class="col-md-4">
+                <span>Sample size: <span text-object="noSampleItems" class="fw-bold"></span></span>
+                <input type="range" id="inp-no-sample-items" class="form-range" min="15" max="40" text-object="noSampleItems">
+            </div>
+            <div class="col-md-4">
+                <span>Number of sampling times: <span text-object="noSamplingTimes" class="fw-bold"></span></span>
+                <input type="range" id="inp-no-sampling-times" class="form-range" min="50" max="200" text-object="noSamplingTimes">
+            </div>
+        </div>
+
+        <div class="mt-3 col-md-6">
+            <h2>Simple random sampling</h2>
+            <p class="text-secondary lh-sm">
+                Simple random sampling is a method of selecting a sample from a population in such a way that every possible sample of a given size has an equal chance of being selected. 
+                In this demonstration, we will generate a population of <span text-object="noPopItems"></span> values and randomly select a sample of <span text-object="noSampleItems"></span> values from the population.
+                You will see how the sample mean varies from sample to sample. This is an example of random error.
+            </p>
+
+            <div>
+                <h3 class="mt-3">Generate data</h3>
+                <div><small class="mt-3">Press the button to generate a population of <span text-object="noPopItems"></span> values.</small></div>
+                <button id="btn-gen-vals" class="btn btn-primary btn-sm">Generate <span text-object="noPopItems"></span> values</button>
+                <div id="div-vals" class="d-flex flex-wrap gap-2 mt-2 p-2 bg-light border rounded"></div>
+                <p class="mt-2">Population mean: <span id="span-pop-mean" class="px-2 py-1 ms-1 text-bg-secondary rounded"></span></p>
+            </div>
+
+            <div id="div-sample-section" class="mt-3">
+                <h3>Random sampling</h3>
+                <div><small>Press the button to randomly select a sample of <span text-object="noSampleItems"></span> values from the <span text-object="noPopItems"></span> values above and calculate the sample mean.</small></div>
+                <button id="btn-sample" class="btn btn-primary btn-sm">Sample <span text-object="noSampleItems"></span> values</button>
+                <div id="div-sample" class="d-flex flex-wrap gap-2 mt-2 p-2 bg-light border rounded"></div>
+                <p class="mt-2">Sample mean: <span id="span-sample-mean" class="px-2 py-1 ms-1 text-bg-success rounded"></span></p>
+            </div>
+        </div>
+
+        <div id="div-sample-means-section" class="mt-3 col-md-6">
+            <h2>Distribution of sample means</h2>
+            <p class="text-secondary lh-sm">
+                In the previous section, we saw how the sample mean varies from sample to sample. In this section, we will randomly select <span text-object="noSamplingTimes"></span> samples of <span text-object="noSampleItems"></span> values each from the population of <span text-object="noPopItems"></span> values.
+                We will calculate the sample mean for each sample and plot the distribution of sample means. You will see that the distribution of sample means is centered around the population mean.
+            </p>
+
+            <div>
+                <h3 class="mt-3">Repeat the sampling</h3>
+                <div><small class="mt-3">Press the button to repeat the above random sampling procedure for <span text-object="noSamplingTimes"></span> times. Below is the list of <span text-object="noSamplingTimes"></span> sample means.</small></div>
+                <button id="btn-sample-means" class="btn btn-primary btn-sm">Get <span text-object="noSamplingTimes"></span> samples</button>
+                <div id="div-sample-means" class="d-flex flex-wrap gap-2 mt-2 p-2 bg-light border rounded"></div>
+                <p class="mt-2">Mean of sample means: <span id="span-mean-sample-means" class="px-2 py-1 ms-1 text-bg-danger rounded"></span></p>
+                <div class="mt-3" id="div-histogram"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <script>
+        const delayTime = 100;
+        const flashTime = 180;
+
+        var noPopItems = 200;
+        var noSampleItems = 20;
+        var noSamplingTimes = 100;
+
+        // --------- FUNCTIONS
+        // **** UI/UX
+        // Update values
+        var updateValues = function(textObject, value) {
+            $("span" + `[text-object="${textObject}"]`).text(value);
+            $("input" + `[text-object="${textObject}"]`).val(value);
+        }
+
+        // Show/Hide sections
+        var showHideSections = function(show = true) {
+            if (show) {
+                $("#div-sample-section").show();
+                $("#div-sample-means-section").show();
+            } else {
+                $("#div-sample-section").hide();
+                $("#div-sample-means-section").hide();
+            }
+        }
+
+        // Clear elements
+        var clearSampleMeans = function() {
+            $("#div-sample-means").html("");
+            $("#span-mean-sample-means").text("");
+            $("#div-histogram").html("");
+        }
+
+        var clearRandomSampling = function() {
+            $("#div-sample").html("");
+            $("#span-sample-mean").text("");
+        }
+
+        var clearPopulation = function() {
+            $("#div-vals").html("");
+            $("#span-pop-mean").text("");
+            showHideSections(false);
+        }
+
+        // Flash item(s)
+        var flashItem = function(itemId, i) {
+            setTimeout(() => {
+                $(itemId).addClass("bg-warning");
+                setTimeout(() => {
+                    $(itemId).removeClass("bg-warning");
+                }, flashTime);
+
+                $("#div-sample").append($(itemId).clone().removeAttr("id"));
+            }, delayTime * i);  
+        }
+
+        var flashAllItems = function(sampleIds, extraDelayTimes = 0) {
+            for (let i = 0; i < sampleIds.length(); i++) {
+                let itemId = `#item-${i}`;
+                flashItem(itemId, i + extraDelayTimes);
+            }
+        }
+
+        var flashItemsTogether = function(itemIds, i, sampleMean) {
+            setTimeout(() => {
+                for (let itemId of itemIds) {
+                    $(itemId).addClass("bg-warning");
+                }
+                setTimeout(() => {
+                    for (let itemId of itemIds) {
+                        $(itemId).removeClass("bg-warning");
+                    }
+                }, delayTime);
+
+                $("#div-sample-means").append(`<span class="badge text-bg-success">${sampleMean.toFixed(2)}</span>`);
+            }, delayTime * i);  
+        }
+
+        // **** RANDOM SAMPLING
+        // Generate values
+        var generateValues = function(noPopItems) {
+            clearRandomSampling();
+            clearSampleMeans();
+
+            let popSum = 0;
+            let vals_str = "";
+
+            for (let i = 0; i < noPopItems; i++) {
+                let val = Math.round(Math.random() * 1000);
+                popSum += val;
+                vals_str += `<span id="item-${i}" class="badge text-bg-secondary">${val}</span>`;
+            }
+
+            $("#div-vals").html(vals_str);
+
+            let popMean = popSum / noPopItems;
+            $("#span-pop-mean").text(popMean.toFixed(2));
+        }
+
+        // Shuffle the array
+        var shuffleArray = function(noPopItems) {
+            // Create an array from 0 to noPopItems - 1
+            let arr = Array.from({length: noPopItems}, (v, k) => k);
+
+            // Shuffle the array
+            for (i = noPopItems - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+
+            return arr;
+        }
+
+        // Get a sample
+        var getSample = function(noSampleItems, noPopItems) {
+            let sampleSum = 0;
+            let sampleIds = shuffleArray(noPopItems).slice(0, noSampleItems);
+
+            for (let i = 0; i < noSampleItems; i++) {
+                let idx = sampleIds[i];
+                let itemId = `#item-${idx}`;
+                let val = parseInt($(itemId).text());
+
+                sampleSum += val;
+            }
+
+            let sampleMean = sampleSum / noSampleItems;
+
+            return [sampleMean, sampleIds];
+        }
+
+        // --------- MAIN
+        $().ready(function() {
+            showHideSections(false);
+
+            updateValues("noPopItems", noPopItems);
+            updateValues("noSampleItems", noSampleItems);
+            updateValues("noSamplingTimes", noSamplingTimes);
+
+            // Event listeners
+            $("#btn-gen-vals").click(function() {
+                generateValues(noPopItems);
+                showHideSections();
+            });
+
+            $("#btn-sample").click(function() {
+                clearRandomSampling();
+
+                const [sampleMean, sampleIds] = getSample(noSampleItems, noPopItems);
+
+                for (let i = 0; i < noSampleItems; i++) {
+                    let idx = sampleIds[i];
+                    let itemId = `#item-${idx}`;
+                    flashItem(itemId, i);
+                }
+
+                setTimeout(() => {
+                    $("#span-sample-mean").text(sampleMean.toFixed(2));
+                }, delayTime * noSampleItems);
+            });
+
+            $("#btn-sample-means").click(function() {
+                clearSampleMeans();
+
+                let sumSampleMeans = 0;
+                let sampleMeans = [];
+
+                for (let i = 0; i < noSamplingTimes; i++) {
+                    const [sampleMean, sampleIds] = getSample(noSampleItems, noPopItems);
+                    sumSampleMeans += sampleMean;
+                    sampleMeans.push(sampleMean);
+                    flashItemsTogether(sampleIds.map(idx => `#item-${idx}`), i, sampleMean);
+                }
+
+                setTimeout(() => {
+                    let meanSampleMeans = sumSampleMeans / noSamplingTimes;
+                    $("#span-mean-sample-means").text(meanSampleMeans.toFixed(2));
+
+                    let data = [{
+                        x: sampleMeans,
+                        type: "histogram",
+                        marker: {color: "rgba(100, 200, 200, 0.7)"}
+                    }];
+                    let layout = {
+                        title: "Distribution of sample means",
+                        font: {family: "'Inter', sans-serif"},
+                        xaxis: {title: "Sample mean"},
+                        yaxis: {title: "Frequency"}
+                    };
+                    Plotly.newPlot("div-histogram", data, layout);
+                }, delayTime * noSamplingTimes);
+            });
+
+            $("#inp-no-pop-items").on("input", function() {
+                noPopItems = parseInt($(this).val());
+                updateValues("noPopItems", noPopItems);
+                clearPopulation();
+                clearRandomSampling();
+                clearSampleMeans();
+            });
+
+            $("#inp-no-sample-items").on("input", function() {
+                noSampleItems = parseInt($(this).val());
+                updateValues("noSampleItems", noSampleItems);
+                clearRandomSampling();
+                clearSampleMeans();
+            });
+
+            $("#inp-no-sampling-times").on("input", function() {
+                noSamplingTimes = parseInt($(this).val());
+                updateValues("noSamplingTimes", noSamplingTimes);
+                clearSampleMeans();
+            });
+        });
+    </script>
+</body>
+</html>
