@@ -56,7 +56,7 @@
                 <p class="mt-2">Population mean: <span id="span-pop-mean" class="px-2 py-1 ms-1 text-bg-secondary rounded"></span></p>
             </div>
 
-            <div id="div-sample-section" class="mt-3">
+            <div id="div-sample-section" class="mt-3" style="display: none;">
                 <h3>Random sampling</h3>
                 <div><small>Press the button to randomly select a sample of <span text-object="noSampleItems"></span> values from the <span text-object="noPopItems"></span> values above and calculate the sample mean.</small></div>
                 <button id="btn-sample" class="btn btn-primary btn-sm">Sample <span text-object="noSampleItems"></span> values</button>
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <div id="div-sample-means-section" class="mt-3 col-md-6">
+        <div id="div-sample-means-section" class="mt-3 col-md-6" style="display: none;">
             <h2>Distribution of sample means</h2>
             <p class="text-secondary lh-sm">
                 In the previous section, we saw how the sample mean varies from sample to sample. In this section, we will randomly select <span text-object="noSamplingTimes"></span> samples of <span text-object="noSampleItems"></span> values each from the population of <span text-object="noPopItems"></span> values.
@@ -221,8 +221,6 @@
 
         // --------- MAIN
         $().ready(function() {
-            showHideSections(false);
-
             updateValues("noPopItems", noPopItems);
             updateValues("noSampleItems", noSampleItems);
             updateValues("noSamplingTimes", noSamplingTimes);
