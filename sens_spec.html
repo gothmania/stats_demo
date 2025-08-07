@@ -91,7 +91,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Test (+)</td>
+                            <th>Test (+)</th>
                             <td>
                                 <input type="number" id="num-tp" class="form-control" placeholder="TP" min="0" x-model.number="tp" @input="calcTotalPos(); calcTotalDisease(); calcTotal(); calcSensitivity(); calcPPV(); calcAccuracy(); calcPrevalence()">
                             </td>
@@ -103,7 +103,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>Test (-)</td>
+                            <th>Test (-)</th>
                             <td>
                                 <input type="number" id="num-fn" class="form-control" placeholder="FN" min="0" x-model.number="fn" @input="calcTotalNeg(); calcTotalDisease(); calcTotal(); calcSensitivity(); calcNPV(); calcAccuracy(); calcPrevalence()">
                             </td>
@@ -115,7 +115,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>Total</td>
+                            <th>Total</th>
                             <td class="text-center">
                                 <span id="num-total-disease" x-text="totalDisease"></span>
                             </td>
