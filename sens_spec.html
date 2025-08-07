@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic accuracy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="container" x-data="{
+    tp: 0, fp: 0, tn: 0, fn: 0,
+    totalPos: 0, totalNeg: 0, totalDisease: 0, totalNoDisease: 0, total: 10000,
+    se: 90, sp: 85, ppv: 0, npv: 0, acc: 0, prev: 20,
+    calcTotalPos() {
+        this.totalPos = this.tp + this.fp;
+    },
+    calcTotalNeg() {
+        this.totalNeg = this.tn + this.fn;
+    },
+    calcTotalDisease() {
+        this.totalDisease = this.tp + this.fn;
+    },
+    calcTotalNoDisease() {
+        this.totalNoDisease = this.fp + this.tn;
+    },
+    calcTotal() {
+        this.total = this.totalPos + this.totalNeg;
+    },
+    calcSensitivity() {
+        this.se = Math.round(this.tp / this.totalDisease * 100 * 10) / 10;
+    },
+    calcSpecificity() {
+        this.sp = Math.round(this.tn / this.totalNoDisease * 100 * 10) / 10;
+    },
+    calcPPV() {
+        this.ppv = this.tp / this.totalPos * 100;
+    },
+    calcNPV() {
+        this.npv = this.tn / this.totalNeg * 100;
+    },
+    calcAccuracy() {
+        this.acc = (this.tp + this.tn) / this.total * 100;
+    },
+    calcPrevalence() {
+        this.prev = Math.round(this.totalDisease / this.total * 100 * 10) / 10;
+    },
+    calcAllFromTotal() {
+        this.totalDisease = Math.round(this.total * (this.prev / 100));
+        this.totalNoDisease = this.total - this.totalDisease;
+        this.tp = Math.round(this.totalDisease * (this.se / 100));
+        this.fn = this.totalDisease - this.tp;
+        this.tn = Math.round(this.totalNoDisease * (this.sp / 100));
+        this.fp = this.totalNoDisease - this.tn;
+        this.calcTotalPos();
+        this.calcTotalNeg();
+        this.calcPPV();
+        this.calcNPV();
+        this.calcAccuracy();
+    }
+}" x-init="calcAllFromTotal()">
+    <main class="py-4 row">
+        <h1>Diagnostic accuracy</h1>
+        <p class="mt-3">
+            <span class="fst-italic">Welcome! In this demonstration, we will show visualize the concept of random error in statistics.</span>
+            <a href="index.html">Back to Home</a>
+        </p>
+        <p class="text-secondary lh-sm">
+            You can either enter the number of true positives, false positives, true negatives, and false negatives to calculate the diagnostic accuracy metrics or enter the total number, prevalence, sensitivity, and specificity to calculate all other numbers.
+        </p>
+        <div class="row">
+            <div class="col-md-6">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th width="25%" class="text-center">Disease</th>
+                            <th width="25%" class="text-center">No disease</th>
+                            <th width="30%" class="text-center">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Test (+)</td>
+                            <td>
+                                <input type="number" id="num-tp" class="form-control" placeholder="TP" min="0" x-model.number="tp" @input="calcTotalPos(); calcTotalDisease(); calcTotal(); calcSensitivity(); calcPPV(); calcAccuracy(); calcPrevalence()">
+                            </td>
+                            <td>
+                                <input type="number" id="num-fp" class="form-control" placeholder="FP" min="0" x-model.number="fp" @input="calcTotalPos(); calcTotalNoDisease(); calcTotal(); calcSpecificity(); calcPPV(); calcAccuracy(); calcPrevalence()">
+                            </td>
+                            <td class="text-center">
+                                <span id="num-total-pos" x-text="totalPos"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Test (-)</td>
+                            <td>
+                                <input type="number" id="num-fn" class="form-control" placeholder="FN" min="0" x-model.number="fn" @input="calcTotalNeg(); calcTotalDisease(); calcTotal(); calcSensitivity(); calcNPV(); calcAccuracy(); calcPrevalence()">
+                            </td>
+                            <td>
+                                <input type="number" id="num-tn" class="form-control" placeholder="TN" min="0" x-model.number="tn" @input="calcTotalNeg(); calcTotalNoDisease(); calcTotal(); calcSpecificity(); calcNPV(); calcAccuracy(); calcPrevalence()">
+                            </td>
+                            <td class="text-center">
+                                <span id="num-total-pos" x-text="totalNeg"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Total</td>
+                            <td class="text-center">
+                                <span id="num-total-disease" x-text="totalDisease"></span>
+                            </td>
+                            <td class="text-center">
+                                <span id="num-total-nodisease" x-text="totalNoDisease"></span>
+                            </td>
+                            <td>
+                                <input type="number" id="num-totalneg" class="form-control" min="0" x-model.number="total" @input="calcAllFromTotal()">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6 pt-3 pt-md-0">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Prevalence</td>
+                            <td>
+                                <input type="number" id="num-prev" class="form-control" min="0" min="100" x-model.number="prev" @input="calcAllFromTotal()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Sensitivity (Se)</td>
+                            <td>
+                                <input type="number" id="num-se" class="form-control" min="0" max="100" x-model.number="se" @input="calcAllFromTotal()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Specificity (Sp)</td>
+                            <td>
+                                <input type="number" id="num-sp" class="form-control" min="0" max="100" x-model.number="sp" @input="calcAllFromTotal()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Positive Predictive Value (PPV)</td>
+                            <td><span id="num-ppv" x-text="ppv.toFixed(1)"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Negative Predictive Value (NPV)</td>
+                            <td><span id="num-npv" x-text="npv.toFixed(1)"></span></td>
+                        </tr>
+                        <tr>
+                            <td>Accuracy</td>
+                            <td><span id="num-acc" x-text="acc.toFixed(1)"></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
