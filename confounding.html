@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confounding bias</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .estimate {
+            background-color: #77ffe4;
+            padding: 0.05rem 0.2rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="container" x-data="{
+    risk_covid_in_exp_high: 5,
+    risk_covid_in_exp_low: 15,
+    risk_covid_in_unexp_high: 10,
+    risk_covid_in_unexp_low: 20,
+    prop_high_in_exp: 80,
+    prop_high_in_unexp: 40,
+    prev_exp: 0.2,
+    calcAll() {
+        const prop_low_in_exp = 100 - this.prop_high_in_exp;
+        const prop_low_in_unexp = 100 - this.prop_high_in_unexp;
+        const prev_unexp = 1 - this.prev_exp;
+
+        this.rd_covid_in_high = (this.risk_covid_in_unexp_high - this.risk_covid_in_exp_high).toFixed(1);
+        this.rr_covid_in_high = (this.risk_covid_in_exp_high / this.risk_covid_in_unexp_high).toFixed(2);
+        this.rd_covid_in_low = (this.risk_covid_in_unexp_low - this.risk_covid_in_exp_low).toFixed(1);
+        this.rr_covid_in_low = (this.risk_covid_in_exp_low / this.risk_covid_in_unexp_low).toFixed(2);
+        const risk_exp = (this.risk_covid_in_exp_high * this.prop_high_in_exp + this.risk_covid_in_exp_low * prop_low_in_exp) / 100;
+        const risk_unexp = (this.risk_covid_in_unexp_high * this.prop_high_in_unexp + this.risk_covid_in_unexp_low * prop_low_in_unexp) / 100;
+        this.rd_covid_overall = (risk_unexp - risk_exp).toFixed(1);
+        this.rr_covid_overall = (risk_exp / risk_unexp).toFixed(2);
+
+        this.risk_exp_in_high = (this.prop_high_in_exp * this.prev_exp) / (this.prop_high_in_exp * this.prev_exp + this.prop_high_in_unexp * prev_unexp) * 100;
+        this.risk_exp_in_low = (prop_low_in_exp * this.prev_exp) / (prop_low_in_exp * this.prev_exp + prop_low_in_unexp * prev_unexp) * 100;
+        this.rr_exp_ses = (this.risk_exp_in_high / this.risk_exp_in_low).toFixed(2);
+
+        const data = [
+            {
+                x: ['Red wine', 'No red wine'],
+                y: [this.risk_covid_in_exp_high, this.risk_covid_in_unexp_high],
+                name: 'High economic status',
+                type: 'scatter',
+                marker: { size: 11, color: '#b3a812'}
+            },
+            {
+                x: ['Red wine', 'No red wine'],
+                y: [this.risk_covid_in_exp_low, this.risk_covid_in_unexp_low],
+                name: 'Low economic status',
+                type: 'scatter',
+                marker: { size: 11, color: '#1a82ff' }
+            },
+            {
+                x: ['Red wine', 'No red wine'],
+                y: [risk_exp, risk_unexp],
+                name: 'Overall',
+                type: 'scatter',
+                marker: { size: 13, symbol: 'square', color: '#ff1a40' }
+            }
+        ];
+
+        const layout = {
+            title: 'Risk of Covid-19 by red wine consumption and economic status',
+            yaxis: { title: 'Risk of Covid-19 (%)', range: [0, Math.max(this.risk_covid_in_exp_high, this.risk_covid_in_exp_low, this.risk_covid_in_unexp_high, this.risk_covid_in_unexp_low) + 5] },
+            font: { family: 'Inter, sans-serif' }
+        };
+        const toImageButtonOptions = {
+            format: 'svg',
+            filename: 'confounding_bias_plot',
+            height: 400,
+            width: 600,
+            scale: 2
+        };
+
+        Plotly.newPlot('div-plot', data, layout, {responsive: true, toImageButtonOptions: toImageButtonOptions} );
+    }
+}" x-init="calcAll()">
+    <main class="py-4 row">
+        <h1>Confounding bias</h1>
+        <p class="mt-3">
+            <span class="fst-italic">Welcome! In this demonstration, we will explain the concept of confounding bias.</span>
+            <a href="index.html">Back to Home</a>
+        </p>
+        <p class="text-secondary lh-sm">
+            In an imaginary cohort study, we are evaluating whether consumption of red wine (exposure) is associated with fewer risks of Covid-19 (outcome). This exposure-outcome association is confounded by economic status (confounder), which is associated with both the exposure and the outcome. In this example, we assume all variables are binary, and people with higher economic status are more likely to drink red wine and also have better access to healthcare, which may reduce their risk of Covid-19. In the section below, you can enter the risk (in percentage) of Covid in people who do and do not drink red wine according to their economic status, as well as the proportion of people with high economic status within each exposure group. A chart will show how the confounding bias affects the observed association between red wine consumption and Covid-19 risk.
+        </p>
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="2"><i>Risk of Covid-19</i></td>
+                        </tr>
+                        <tr>
+                            <td>Red wine, high economic status (%)</td>
+                            <td>
+                                <input type="number" id="risk-exp-high" class="form-control" min="0" max="100" x-model.number="risk_covid_in_exp_high" @input="calcAll()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Red wine, low economic status (%)</td>
+                            <td>
+                                <input type="number" id="risk-exp-low" class="form-control" min="0" max="100" x-model.number="risk_covid_in_exp_low" @input="calcAll()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>No red wine, high economic status (%)</td>
+                            <td>
+                                <input type="number" id="risk-unexp-high" class="form-control" min="0" max="100" x-model.number="risk_covid_in_unexp_high" @input="calcAll()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>No red wine, low economic status (%)</td>
+                            <td>
+                                <input type="number" id="risk-unexp-low" class="form-control" min="0" max="100" x-model.number="risk_covid_in_unexp_low" @input="calcAll()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><i>Proportion of people with high economic status</i></td>
+                        </tr>
+                        <tr>
+                            <td>Among Red wine (%)</td>
+                            <td>
+                                <input type="number" id="prop-exp-high" class="form-control" min="0" max="100" x-model.number="prop_high_in_exp" @input="calcAll()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Among No red wine (%)</td>
+                            <td>
+                                <input type="number" id="prop-unexp-high" class="form-control" min="0" max="100" x-model.number="prop_high_in_unexp" @input="calcAll()">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6 pt-3 pt-md-0">
+                <h4>Scenario</h4>
+                <div style="font-size: 0.8rem;">
+                    <p>Based on the data, the risk difference (RD) and risk ratio (RR) of Covid-19 comparing red wine drinkers to non-drinkers are:</p>
+                    <ul>
+                        <li>Among people with high economic status: RD=<span x-text="rd_covid_in_high" class="fw-bold estimate"></span>%; RR=<span x-text="rr_covid_in_high" class="fw-bold estimate"></span></li>
+                        <li>Among people with low economic status: RD=<span x-text="rd_covid_in_low" class="fw-bold estimate"></span>%; RR=<span x-text="rr_covid_in_low" class="fw-bold estimate"></span></li>
+                        <li>Overall (crude): RD=<span x-text="rd_covid_overall" class="fw-bold estimate"></span>%; RR=<span x-text="rr_covid_overall" class="fw-bold estimate"></span></li>
+                    </ul>
+                    <p>Assuming an overall prevalence of drinking red wine of <span x-text="(prev_exp * 100).toFixed(1)" class="fw-bold estimate"></span>%, the prevalences of drinking red wine among people with high and low economic status are <span x-text="risk_exp_in_high.toFixed(1)" class="fw-bold estimate"></span>% and <span x-text="risk_exp_in_low.toFixed(1)" class="fw-bold estimate"></span>%, respectively, resulting in a PR measuring the confounder-exposure association of <span x-text="rr_exp_ses" class="fw-bold estimate"></span>.</p>
+                </div>
+                <div id="div-plot"></div>
+            </div>
+        </div>
+    </main>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</body>
+</html>
