@@ -153,7 +153,7 @@
             </div>
             <div class="col-md-6 pt-3 pt-md-0">
                 <h4>Scenario</h4>
-                <div style="font-size: 0.8rem;">
+                <small>
                     <p>Based on the data, the risk difference (RD) and risk ratio (RR) of Covid-19 comparing red wine drinkers to non-drinkers are:</p>
                     <ul>
                         <li>Among people with high economic status: RD=<span x-text="rd_covid_in_high" class="fw-bold estimate"></span>%; RR=<span x-text="rr_covid_in_high" class="fw-bold estimate"></span></li>
@@ -161,7 +161,7 @@
                         <li>Overall (crude): RD=<span x-text="rd_covid_overall" class="fw-bold estimate"></span>%; RR=<span x-text="rr_covid_overall" class="fw-bold estimate"></span></li>
                     </ul>
                     <p>Assuming an overall prevalence of drinking red wine of <span x-text="(prev_exp * 100).toFixed(1)" class="fw-bold estimate"></span>%, the prevalences of drinking red wine among people with high and low economic status are <span x-text="risk_exp_in_high.toFixed(1)" class="fw-bold estimate"></span>% and <span x-text="risk_exp_in_low.toFixed(1)" class="fw-bold estimate"></span>%, respectively, resulting in a PR measuring the confounder-exposure association of <span x-text="rr_exp_ses" class="fw-bold estimate"></span>.</p>
-                </div>
+                </small>
                 <div id="div-plot"></div>
             </div>
         </div>
